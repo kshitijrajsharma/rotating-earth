@@ -35,6 +35,7 @@
       .pulse {
         animation: pulse 2s infinite ease-in-out;
       }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -45,18 +46,99 @@
           transform: translateY(0);
         }
       }
+
       .fade-in {
         animation: fadeIn 0.5s ease-out forwards;
       }
-      @media (max-width: 768px) {
+
+      body {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Improved responsive design for all screen sizes */
+      @media (max-width: 640px) {
         #info {
-          top: 80px;
+          top: 70px;
           left: 10px;
           right: 10px;
-          /* transform: translateY(-50%); */
+          max-width: calc(100% - 20px);
         }
-        .fixed.top-4.right-11 {
+
+        .title-container {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          text-align: center;
+        }
+
+        .control-bar {
+          flex-direction: column;
+          gap: 8px;
+          padding: 8px;
+        }
+
+        .controls-group,
+        .legend-group {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .controls-group {
+          order: 2;
+        }
+
+        .legend-group {
+          order: 1;
+          margin-bottom: 4px;
+        }
+
+        .material-icons {
+          font-size: 18px;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 768px) {
+        #info {
+          top: 75px;
+          left: 10px;
+          max-width: 300px;
+        }
+
+        .title-container {
+          top: 15px;
+          right: 60px;
+        }
+
+        .control-bar {
+          padding: 10px;
+        }
+      }
+
+      @media (min-width: 769px) {
+        #info {
           top: 20px;
+          left: 20px;
+          max-width: 350px;
+        }
+
+        .title-container {
+          top: 20px;
+          right: 70px;
+        }
+      }
+
+      /* Improve navigation control position */
+      .maplibregl-ctrl-top-right {
+        top: 10px;
+        right: 10px;
+      }
+
+      /* Make buttons easier to tap on mobile */
+      @media (max-width: 640px) {
+        .control-button {
+          padding: 8px 12px;
+          font-size: 12px;
         }
       }
     </style>
@@ -70,7 +152,7 @@
     <!-- Info Card -->
     <div
       id="info"
-      class="hidden fade-in fixed top-4 left-4 md:max-w-sm bg-gray-900/90 backdrop-blur rounded-lg p-4 shadow-xl border border-cyan-500/20 z-10"
+      class="hidden fade-in fixed bg-gray-900/90 backdrop-blur rounded-lg p-4 shadow-xl border border-cyan-500/20 z-10"
     >
       <button
         id="close-info"
@@ -83,47 +165,49 @@
     </div>
 
     <!-- Title -->
-    <div class="fixed top-4 right-11 z-10 text-right">
+    <div class="fixed z-10 text-right title-container">
       <h1
         class="text-xl md:text-2xl font-bold text-cyan-400 drop-shadow-lg m-0"
       >
         fAIr AI Models Worldwide
       </h1>
-      <p class="text-sm md:text-base mt-1 text-gray-300">
+      <p class="text-xs md:text-sm mt-1 text-gray-300">
         Click on points to see model details
       </p>
     </div>
 
     <!-- Legend & Controls -->
     <div
-      class="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm p-3 flex flex-col md:flex-row justify-between items-center z-10 border-t border-cyan-900/30"
+      class="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm p-3 flex flex-wrap justify-between items-center z-10 border-t border-cyan-900/30 control-bar"
     >
-      <div class="flex items-center gap-3 mb-2 md:mb-0">
+      <div class="flex flex-wrap items-center gap-2 md:gap-3 controls-group">
         <button
           id="toggle-rotation"
-          class="flex items-center gap-2 bg-cyan-800/70 hover:bg-cyan-700/80 text-cyan-100 px-3 py-2 rounded transition-all font-medium text-sm"
+          class="control-button flex items-center gap-1 md:gap-2 bg-cyan-800/70 hover:bg-cyan-700/80 text-cyan-100 px-2 md:px-3 py-1 md:py-2 rounded transition-all font-medium text-xs md:text-sm"
         >
-          <span class="material-icons align-middle">autorenew</span>
+          <span class="material-icons text-sm md:text-base">autorenew</span>
           <span>Rotation: ON</span>
         </button>
         <button
           id="toggle-theme"
-          class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded transition-all font-medium text-sm"
+          class="control-button flex items-center gap-1 md:gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-2 md:px-3 py-1 md:py-2 rounded transition-all font-medium text-xs md:text-sm"
         >
-          <span class="material-icons align-middle">wb_sunny</span>
+          <span class="material-icons text-sm md:text-base">wb_sunny</span>
           <span>Classic Map</span>
         </button>
         <button
           id="toggle-api"
-          class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded transition-all font-medium text-sm"
+          class="control-button flex items-center gap-1 md:gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-2 md:px-3 py-1 md:py-2 rounded transition-all font-medium text-xs md:text-sm"
         >
-          <span class="material-icons align-middle">api</span>
+          <span class="material-icons text-sm md:text-base">api</span>
           <span>API: DEV</span>
         </button>
       </div>
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2">
-          <span class="inline-block h-3 w-3 bg-cyan-400 rounded-full"></span>
+      <div class="flex items-center gap-2 md:gap-3 legend-group">
+        <div class="flex items-center gap-1 md:gap-2">
+          <span
+            class="inline-block h-2 md:h-3 w-2 md:w-3 bg-cyan-400 rounded-full"
+          ></span>
           <span class="text-xs text-gray-300">AI Model Locations</span>
         </div>
         <div class="text-xs text-gray-400">
@@ -139,9 +223,11 @@
     >
       <div class="text-center">
         <div
-          class="inline-block rounded-full h-12 w-12 border-t-2 border-r-2 border-cyan-500 animate-spin mb-3"
+          class="inline-block rounded-full h-10 w-10 md:h-12 md:w-12 border-t-2 border-r-2 border-cyan-500 animate-spin mb-3"
         ></div>
-        <p class="text-cyan-400 font-medium">Loading Globe...</p>
+        <p class="text-cyan-400 font-medium text-sm md:text-base">
+          Loading Globe...
+        </p>
       </div>
     </div>
 
@@ -179,22 +265,43 @@
         rotationSpeed = 0.12,
         animationFrameId;
 
+      // Determine optimal zoom level based on screen size
+      function getOptimalZoom() {
+        const width = window.innerWidth;
+        if (width < 480) return 0.8;
+        if (width < 640) return 1.0;
+        if (width < 768) return 1.2;
+        if (width < 1024) return 1.5;
+        if (width < 1280) return 1.8;
+        return 2.0;
+      }
+
+      // Adjust rotation speed based on screen size
+      function getOptimalRotationSpeed() {
+        const width = window.innerWidth;
+        if (width < 480) return 0.08; // Slower for small screens
+        if (width < 768) return 0.1;
+        return 0.12;
+      }
+
       const map = new maplibregl.Map({
         container: "map",
         style: mapStyles.dark,
         center: [0, 20],
-        zoom: window.innerWidth < 768 ? 1.2 : 1.8,
+        zoom: getOptimalZoom(),
         projection: "globe",
-        // pitch: 30,
         antialias: true,
         attributionControl: false,
+        maxTileCacheSize: 50, // Optimize for mobile
+        preserveDrawingBuffer: true, // Better for some mobile browsers
       });
 
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
-      // map.addControl(
-      //   new maplibregl.AttributionControl({ compact: true }),
-      //   "bottom-left"
-      // );
+      // Add customized navigation control
+      const navControl = new maplibregl.NavigationControl({
+        showCompass: false,
+        visualizePitch: false,
+      });
+      map.addControl(navControl, "top-right");
 
       const toggleRotationBtn = document.getElementById("toggle-rotation");
       const toggleThemeBtn = document.getElementById("toggle-theme");
@@ -206,10 +313,11 @@
         toggleRotationBtn.classList.toggle("bg-cyan-800/70");
         toggleRotationBtn.classList.toggle("bg-cyan-600/90");
         if (isRotating) {
-          toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">autorenew</span> <span>Rotation: ON</span>`;
+          toggleRotationBtn.innerHTML = `<span class="material-icons text-sm md:text-base">autorenew</span> <span>Rotation: ON</span>`;
+          rotationSpeed = getOptimalRotationSpeed();
           animateGlobe();
         } else {
-          toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
+          toggleRotationBtn.innerHTML = `<span class="material-icons text-sm md:text-base">pause</span> <span>Rotation: OFF</span>`;
           cancelAnimationFrame(animationFrameId);
         }
       });
@@ -219,8 +327,8 @@
         currentMapStyle = currentMapStyle === "dark" ? "classic" : "dark";
         toggleThemeBtn.innerHTML =
           currentMapStyle === "classic"
-            ? `<span class="material-icons align-middle">dark_mode</span> <span>Modern Map</span>`
-            : `<span class="material-icons align-middle">wb_sunny</span> <span>Classic Map</span>`;
+            ? `<span class="material-icons text-sm md:text-base">dark_mode</span> <span>Modern Map</span>`
+            : `<span class="material-icons text-sm md:text-base">wb_sunny</span> <span>Classic Map</span>`;
         map.setStyle(mapStyles[currentMapStyle]);
         map.once("style.load", addMapLayers);
       });
@@ -232,7 +340,7 @@
           currentAPI === "prod"
             ? "https://api-prod.fair.hotosm.org"
             : "https://fair-dev.hotosm.org";
-        toggleApiBtn.innerHTML = `<span class="material-icons align-middle">api</span> <span>API: ${currentAPI.toUpperCase()}</span>`;
+        toggleApiBtn.innerHTML = `<span class="material-icons text-sm md:text-base">api</span> <span>API: ${currentAPI.toUpperCase()}</span>`;
         // Re-fetch map layers with new API endpoint
         addMapLayers();
       });
@@ -240,7 +348,9 @@
       map.on("style.load", () => {
         map.setProjection({ type: "globe" });
         addMapLayers();
+        rotationSpeed = getOptimalRotationSpeed();
         animateGlobe();
+
         map.on("mousedown", () => {
           document.getElementById("info").classList.add("hidden");
           if (isRotating) {
@@ -249,7 +359,7 @@
               "bg-cyan-800/70",
               "bg-cyan-600/90"
             );
-            toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
+            toggleRotationBtn.innerHTML = `<span class="material-icons text-sm md:text-base">pause</span> <span>Rotation: OFF</span>`;
             cancelAnimationFrame(animationFrameId);
           }
         });
@@ -270,42 +380,68 @@
             document.getElementById(
               "model-count"
             ).textContent = `${modelCount} models worldwide`;
+
             if (!map.getSource("centroids")) {
-              map.addSource("centroids", { type: "geojson", data });
+              map.addSource("centroids", {
+                type: "geojson",
+                data,
+                cluster: false, // Disable clustering for better mobile performance
+                maxzoom: 14,
+              });
+
+              // Responsive point sizes based on screen width
+              const getCircleRadius = () => {
+                const width = window.innerWidth;
+                if (width < 480) return 6;
+                if (width < 768) return 7;
+                return 5;
+              };
+
+              const getGlowRadius = () => {
+                const width = window.innerWidth;
+                if (width < 480) return 14;
+                if (width < 768) return 16;
+                return 18;
+              };
+
               map.addLayer({
                 id: "centroid-outer-glow",
                 type: "circle",
                 source: "centroids",
                 paint: {
-                  "circle-radius": 18,
+                  "circle-radius": getGlowRadius(),
                   "circle-color": "#00FFFF",
                   "circle-opacity": 0.15,
                   "circle-blur": 1,
                 },
               });
+
               map.addLayer({
                 id: "centroid-glow",
                 type: "circle",
                 source: "centroids",
                 paint: {
-                  "circle-radius": 10,
+                  "circle-radius": getGlowRadius() * 0.6,
                   "circle-color": "#00FFFF",
                   "circle-opacity": 0.3,
                   "circle-blur": 0.8,
                 },
               });
+
               map.addLayer({
                 id: "centroid-points",
                 type: "circle",
                 source: "centroids",
                 paint: {
-                  "circle-radius": window.innerWidth < 768 ? 8 : 5,
+                  "circle-radius": getCircleRadius(),
                   "circle-color":
                     currentMapStyle === "dark" ? "#00FFFF" : "#006060",
                   "circle-stroke-width": 1.5,
                   "circle-stroke-color": "white",
                 },
               });
+
+              // Pulse animation for points
               let opacity = 0.7,
                 increasing = true;
               setInterval(() => {
@@ -319,6 +455,10 @@
                     opacity
                   );
               }, 50);
+
+              // Increase touch target size on mobile
+              const pointClickRadius = window.innerWidth < 768 ? 15 : 5;
+
               map.on("click", "centroid-points", (e) => {
                 if (isRotating) {
                   isRotating = false;
@@ -326,7 +466,7 @@
                     "bg-cyan-800/70",
                     "bg-cyan-600/90"
                   );
-                  toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
+                  toggleRotationBtn.innerHTML = `<span class="material-icons text-sm md:text-base">pause</span> <span>Rotation: OFF</span>`;
                   cancelAnimationFrame(animationFrameId);
                 }
                 const mid = e.features[0].properties.mid;
@@ -334,9 +474,11 @@
                   .then((res) => res.json())
                   .then((model) => showModelInfo(model));
               });
+
               map.on("mouseenter", "centroid-points", () => {
                 map.getCanvas().style.cursor = "pointer";
               });
+
               map.on("mouseleave", "centroid-points", () => {
                 map.getCanvas().style.cursor = "";
               });
@@ -362,6 +504,8 @@
             day: "numeric",
           }
         );
+
+        // Responsive template for model info
         infoContent.innerHTML = `
           <h2 class="text-lg font-bold text-cyan-400 mb-2">${
             model.name || "Unnamed Model"
@@ -381,7 +525,7 @@
                 : '<p class="text-gray-400 text-sm">Accuracy not available</p>'
             }
           </div>
-          <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
+          <div class="grid grid-cols-2 gap-2 mb-4 text-xs sm:text-sm">
             <div>
               <p class="text-gray-400">User</p>
               <p class="font-medium">${
@@ -405,21 +549,66 @@
           </div>
           <button onclick="window.open('${API_URL}/ai-models/${
           model.id
-        }', '_blank')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center gap-2">
-            <span class="material-icons">open_in_new</span>
+        }', '_blank')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-1.5 sm:py-2 px-4 rounded transition-colors flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <span class="material-icons text-sm sm:text-base">open_in_new</span>
             <span>Explore Model</span>
           </button>
         `;
         infoCard.classList.remove("hidden");
       }
 
+      // Improved resize handling with debounce
+      let resizeTimeout;
       window.addEventListener("resize", () => {
-        map.setZoom(window.innerWidth < 768 ? 1.2 : 1.8);
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          map.setZoom(getOptimalZoom());
+          rotationSpeed = getOptimalRotationSpeed();
+
+          // Update point sizes on resize if needed
+          if (map.getLayer("centroid-points")) {
+            const pointRadius =
+              window.innerWidth < 480 ? 6 : window.innerWidth < 768 ? 7 : 5;
+            map.setPaintProperty(
+              "centroid-points",
+              "circle-radius",
+              pointRadius
+            );
+
+            const glowRadius =
+              window.innerWidth < 480 ? 14 : window.innerWidth < 768 ? 16 : 18;
+            map.setPaintProperty(
+              "centroid-outer-glow",
+              "circle-radius",
+              glowRadius
+            );
+            map.setPaintProperty(
+              "centroid-glow",
+              "circle-radius",
+              glowRadius * 0.6
+            );
+          }
+        }, 250); // Debounce resize events
       });
 
       document.getElementById("close-info").addEventListener("click", () => {
         document.getElementById("info").classList.add("hidden");
       });
+
+      // Handle orientation change on mobile
+      window.addEventListener("orientationchange", () => {
+        setTimeout(() => {
+          map.resize();
+          map.setZoom(getOptimalZoom());
+        }, 200);
+      });
+
+      // Optimize touch interactions
+      if ("ontouchstart" in window) {
+        // For touch devices, implement better touch handling
+        map.dragRotate.disable();
+        map.touchZoomRotate.disableRotation();
+      }
     </script>
   </body>
 </html>
