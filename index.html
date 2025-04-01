@@ -31,9 +31,7 @@
           opacity: 0.8;
         }
       }
-      .maplibregl-canvas {
-        margin-top: -60px !important;
-      }
+
       .pulse {
         animation: pulse 2s infinite ease-in-out;
       }
@@ -74,7 +72,7 @@
     </div>
 
     <!-- Title -->
-    <div class="fixed top-4 right-4 z-10 text-right">
+    <div class="fixed top-4 right-11 z-10 text-right">
       <h1
         class="text-xl md:text-2xl font-bold text-cyan-400 drop-shadow-lg m-0"
       >
@@ -176,12 +174,12 @@
         center: [0, 20],
         zoom: window.innerWidth < 768 ? 1.2 : 1.8,
         projection: "globe",
-        pitch: 30,
+        // pitch: 30,
         antialias: true,
         attributionControl: false,
       });
 
-      map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
       map.addControl(
         new maplibregl.AttributionControl({ compact: true }),
         "bottom-left"
@@ -233,6 +231,7 @@
         addMapLayers();
         animateGlobe();
         map.on("mousedown", () => {
+          document.getElementById("info").classList.add("hidden");
           if (isRotating) {
             isRotating = false;
             toggleRotationBtn.classList.replace(
@@ -365,9 +364,9 @@
                        100
                      )}%"></div>
                    </div>
-                   <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${
-                     model.accuracy
-                   }%</div>`
+                   <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${model.accuracy.toFixed(
+                     2
+                   )}%</div>`
                 : '<p class="text-gray-400 text-sm">Accuracy not available</p>'
             }
           </div>
