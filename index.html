@@ -48,6 +48,17 @@
       .fade-in {
         animation: fadeIn 0.5s ease-out forwards;
       }
+      @media (max-width: 768px) {
+        #info {
+          top: 80px;
+          left: 10px;
+          right: 10px;
+          /* transform: translateY(-50%); */
+        }
+        .fixed.top-4.right-11 {
+          top: 20px;
+        }
+      }
     </style>
   </head>
   <body
@@ -288,7 +299,7 @@
                 type: "circle",
                 source: "centroids",
                 paint: {
-                  "circle-radius": 5,
+                  "circle-radius": window.innerWidth < 768 ? 8 : 5,
                   "circle-color":
                     currentMapStyle === "dark" ? "#00FFFF" : "#006060",
                   "circle-stroke-width": 1.5,
