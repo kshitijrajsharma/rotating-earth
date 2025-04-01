@@ -9,31 +9,9 @@
       rel="stylesheet"
     />
     <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background: #04090d;
-        overflow: hidden;
-      }
-      #map {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-      }
-      .map-container {
-        position: relative;
-        height: 100vh;
-        width: 100vw;
-      }
+      /* Custom animations */
       @keyframes pulse {
         0% {
           transform: scale(1);
@@ -64,145 +42,148 @@
       .fade-in {
         animation: fadeIn 0.5s ease-out forwards;
       }
-      .maplibregl-ctrl-bottom-right {
-        margin-bottom: 4rem !important;
-      }
-      @media (max-width: 640px) {
-        .maplibregl-ctrl-bottom-right {
-          margin-bottom: 5rem !important;
-        }
-      }
     </style>
   </head>
-  <body class="font-sans text-gray-100">
-    <div class="map-container">
-      <div id="map"></div>
+  <body
+    class="m-0 p-0 h-screen w-screen bg-[#04090d] overflow-hidden relative font-sans text-gray-100"
+  >
+    <!-- Map (full screen) -->
+    <div id="map" class="absolute inset-0"></div>
 
-      <!-- Info Card -->
-      <div
-        id="info"
-        class="hidden fade-in fixed top-4 left-4 right-4 md:right-auto md:max-w-sm bg-gray-900/90 backdrop-blur-md rounded-lg p-4 shadow-xl border border-cyan-500/20 z-10 md:left-4"
+    <!-- Info Card (over map) -->
+    <div
+      id="info"
+      class="hidden fade-in fixed top-4 left-4 md:max-w-sm bg-gray-900/90 backdrop-blur rounded-lg p-4 shadow-xl border border-cyan-500/20 z-10"
+    >
+      <button
+        id="close-info"
+        class="absolute top-2 right-3 text-gray-400 hover:text-white transition-colors"
+        aria-label="Close"
       >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </button>
+      <div id="info-content"></div>
+    </div>
+
+    <!-- Title (over map) -->
+    <div class="fixed top-4 right-4 z-10 text-right">
+      <h1
+        class="text-xl md:text-2xl font-bold text-cyan-400 drop-shadow-lg m-0"
+      >
+        fAIr AI Models Worldwide
+      </h1>
+      <p class="text-sm md:text-base mt-1 text-gray-300">
+        Click on points to see model details
+      </p>
+    </div>
+
+    <!-- Legend & Controls -->
+    <div
+      class="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm p-3 flex flex-col md:flex-row justify-between items-center z-10 border-t border-cyan-900/30"
+    >
+      <div class="flex items-center gap-3 mb-2 md:mb-0">
         <button
-          id="close-info"
-          class="absolute top-2 right-3 text-gray-400 hover:text-white transition-colors"
-          aria-label="Close"
+          id="toggle-rotation"
+          class="flex items-center gap-2 bg-cyan-800/70 hover:bg-cyan-700/80 text-cyan-100 px-3 py-2 rounded transition-all font-medium text-sm"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
+            class="h-4 w-4"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
             <path
               fill-rule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
               clip-rule="evenodd"
             />
           </svg>
+          <span>Rotation: ON</span>
         </button>
-        <div id="info-content"></div>
-      </div>
-
-      <!-- Title -->
-      <div class="fixed top-4 right-4 md:right-6 text-right z-10 max-w-xs">
-        <h1
-          class="text-xl md:text-2xl font-bold text-cyan-400 drop-shadow-lg m-0"
+        <button
+          id="toggle-theme"
+          class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded transition-all font-medium text-sm"
         >
-          fAIr AI Models Worldwide
-        </h1>
-        <p class="text-sm md:text-base mt-1 text-gray-300">
-          Click on points to see model details
-        </p>
-      </div>
-
-      <!-- Legend & Controls -->
-      <div
-        class="fixed bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm p-3 flex flex-col md:flex-row justify-between items-center z-10 border-t border-cyan-900/30"
-      >
-        <div class="flex items-center gap-3 mb-2 md:mb-0">
-          <button
-            id="toggle-rotation"
-            class="flex items-center gap-2 bg-cyan-800/70 hover:bg-cyan-700/80 text-cyan-100 px-3 py-2 rounded-md transition-all font-medium text-sm"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="currentColor"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <span>Rotation: ON</span>
-          </button>
-
-          <button
-            id="toggle-theme"
-            class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded-md transition-all font-medium text-sm"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
-              />
-            </svg>
-            <span>Classic Map</span>
-          </button>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2">
-            <span class="inline-block h-3 w-3 bg-cyan-400 rounded-full"></span>
-            <span class="text-xs text-gray-300">AI Model Locations</span>
-          </div>
-          <div class="text-xs text-gray-400">
-            <span id="model-count">Loading models...</span>
-          </div>
-        </div>
+            <path
+              d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
+            />
+          </svg>
+          <span>Classic Map</span>
+        </button>
       </div>
-
-      <!-- Loading Indicator -->
-      <div
-        id="loading"
-        class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-20"
-      >
-        <div class="text-center">
-          <div
-            class="inline-block rounded-full h-12 w-12 border-t-2 border-r-2 border-cyan-500 animate-spin mb-3"
-          ></div>
-          <p class="text-cyan-400 font-medium">Loading Globe...</p>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="inline-block h-3 w-3 bg-cyan-400 rounded-full"></span>
+          <span class="text-xs text-gray-300">AI Model Locations</span>
+        </div>
+        <div class="text-xs text-gray-400">
+          <span id="model-count">Loading models...</span>
         </div>
       </div>
     </div>
 
-    <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
+    <!-- Loading Indicator -->
+    <div
+      id="loading"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900/80 z-20"
+    >
+      <div class="text-center">
+        <div
+          class="inline-block rounded-full h-12 w-12 border-t-2 border-r-2 border-cyan-500 animate-spin mb-3"
+        ></div>
+        <p class="text-cyan-400 font-medium">Loading Globe...</p>
+      </div>
+    </div>
+
     <script>
-      // Hide loading indicator when map loads
+      // Set environment: "dev" or "prod"
+      const ENV = "dev"; // change to "prod" for production
+      const API_URL =
+        ENV === "prod"
+          ? "https://api-prod.fair.hotosm.org"
+          : "https://fair-dev.hotosm.org";
+
       window.addEventListener("load", () => {
         setTimeout(() => {
-          document.getElementById("loading").classList.add("fade-out");
-          setTimeout(() => {
-            document.getElementById("loading").style.display = "none";
-          }, 500);
+          const loadingEl = document.getElementById("loading");
+          loadingEl.classList.add(
+            "opacity-0",
+            "pointer-events-none",
+            "transition-opacity",
+            "duration-500"
+          );
+          setTimeout(() => (loadingEl.style.display = "none"), 500);
         }, 1000);
       });
 
-      // Map styles
       const mapStyles = {
         dark: "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json",
         classic: "https://tiles.stadiamaps.com/styles/osm_bright.json",
       };
 
-      let currentMapStyle = "dark";
-      let modelCount = 0;
+      let currentMapStyle = "dark",
+        modelCount = 0,
+        isRotating = true,
+        rotationDegrees = 0,
+        rotationSpeed = 0.12,
+        animationFrameId;
 
       const map = new maplibregl.Map({
         container: "map",
@@ -215,20 +196,11 @@
         attributionControl: false,
       });
 
-      // Add navigation controls
       map.addControl(new maplibregl.NavigationControl(), "bottom-right");
       map.addControl(
-        new maplibregl.AttributionControl({
-          compact: true,
-        }),
+        new maplibregl.AttributionControl({ compact: true }),
         "bottom-left"
       );
-
-      // Setup rotation controls
-      let isRotating = true;
-      let rotationDegrees = 0;
-      let rotationSpeed = 0.12;
-      let animationFrameId = null;
 
       const toggleRotationBtn = document.getElementById("toggle-rotation");
       const toggleThemeBtn = document.getElementById("toggle-theme");
@@ -237,11 +209,10 @@
         isRotating = !isRotating;
         toggleRotationBtn.classList.toggle("bg-cyan-800/70");
         toggleRotationBtn.classList.toggle("bg-cyan-600/90");
-
         if (isRotating) {
           toggleRotationBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
             </svg>
             <span>Rotation: ON</span>
           `;
@@ -249,7 +220,7 @@
         } else {
           toggleRotationBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
             </svg>
             <span>Rotation: OFF</span>
           `;
@@ -259,61 +230,34 @@
 
       toggleThemeBtn.addEventListener("click", () => {
         currentMapStyle = currentMapStyle === "dark" ? "classic" : "dark";
-
-        if (currentMapStyle === "classic") {
-          toggleThemeBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
-            </svg>
-            <span>Modern Map</span>
-          `;
-        } else {
-          toggleThemeBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-            </svg>
-            <span>Classic Map</span>
-          `;
-        }
-
+        toggleThemeBtn.innerHTML =
+          currentMapStyle === "classic"
+            ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+               </svg>
+               <span>Modern Map</span>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+               </svg>
+               <span>Classic Map</span>`;
         map.setStyle(mapStyles[currentMapStyle]);
-
-        // We need to re-add data sources and layers when style changes
-        map.once("style.load", () => {
-          addMapLayers();
-        });
-      });
-
-      // Close info card
-      document.getElementById("close-info").addEventListener("click", () => {
-        document.getElementById("info").classList.add("hidden");
+        map.once("style.load", addMapLayers);
       });
 
       map.on("style.load", () => {
-        map.setProjection({
-          type: "globe",
-        });
-
+        map.setProjection({ type: "globe" });
         addMapLayers();
-
-        function animateGlobe() {
-          if (!isRotating) return;
-          rotationDegrees += rotationSpeed;
-          map.rotateTo(rotationDegrees, { duration: 0 });
-          animationFrameId = requestAnimationFrame(animateGlobe);
-        }
-
         animateGlobe();
-
-        // Auto-stop rotation when user interacts with map
         map.on("mousedown", () => {
           if (isRotating) {
             isRotating = false;
-            toggleRotationBtn.classList.remove("bg-cyan-800/70");
-            toggleRotationBtn.classList.add("bg-cyan-600/90");
+            toggleRotationBtn.classList.replace(
+              "bg-cyan-800/70",
+              "bg-cyan-600/90"
+            );
             toggleRotationBtn.innerHTML = `
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
               </svg>
               <span>Rotation: OFF</span>
             `;
@@ -322,25 +266,24 @@
         });
       });
 
+      function animateGlobe() {
+        if (!isRotating) return;
+        rotationDegrees += rotationSpeed;
+        map.rotateTo(rotationDegrees, { duration: 0 });
+        animationFrameId = requestAnimationFrame(animateGlobe);
+      }
+
       function addMapLayers() {
-        // Load points
-        fetch("https://fAIr-dev.hotosm.org/api/v1/models/centroid/")
+        fetch(`${API_URL}/api/v1/models/centroid/`)
           .then((res) => res.json())
           .then((data) => {
-            // Update model count
             modelCount = data.features.length;
             document.getElementById(
               "model-count"
             ).textContent = `${modelCount} models worldwide`;
 
-            // Add data source if it doesn't exist
             if (!map.getSource("centroids")) {
-              map.addSource("centroids", {
-                type: "geojson",
-                data,
-              });
-
-              // Add outer glow effect for points
+              map.addSource("centroids", { type: "geojson", data });
               map.addLayer({
                 id: "centroid-outer-glow",
                 type: "circle",
@@ -352,8 +295,6 @@
                   "circle-blur": 1,
                 },
               });
-
-              // Add middle glow effect
               map.addLayer({
                 id: "centroid-glow",
                 type: "circle",
@@ -365,8 +306,6 @@
                   "circle-blur": 0.8,
                 },
               });
-
-              // Add points
               map.addLayer({
                 id: "centroid-points",
                 type: "circle",
@@ -379,51 +318,39 @@
                   "circle-stroke-color": "white",
                 },
               });
-
-              // Add pulsing animation to points
-              let opacity = 0.7;
-              let increasing = true;
-
+              let opacity = 0.7,
+                increasing = true;
               setInterval(() => {
-                if (increasing) {
-                  opacity += 0.01;
-                  if (opacity >= 0.9) increasing = false;
-                } else {
-                  opacity -= 0.01;
-                  if (opacity <= 0.6) increasing = true;
-                }
-
-                if (map.getLayer("centroid-points")) {
+                opacity = increasing ? opacity + 0.01 : opacity - 0.01;
+                if (opacity >= 0.9) increasing = false;
+                if (opacity <= 0.6) increasing = true;
+                if (map.getLayer("centroid-points"))
                   map.setPaintProperty(
                     "centroid-points",
                     "circle-opacity",
                     opacity
                   );
-                }
               }, 50);
-
-              // Handle point clicks
               map.on("click", "centroid-points", (e) => {
-                // Stop rotation when clicking on points for better interaction
                 if (isRotating) {
                   isRotating = false;
-                  toggleRotationBtn.classList.remove("bg-cyan-800/70");
-                  toggleRotationBtn.classList.add("bg-cyan-600/90");
+                  toggleRotationBtn.classList.replace(
+                    "bg-cyan-800/70",
+                    "bg-cyan-600/90"
+                  );
                   toggleRotationBtn.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
                     </svg>
                     <span>Rotation: OFF</span>
                   `;
                   cancelAnimationFrame(animationFrameId);
                 }
-
                 const mid = e.features[0].properties.mid;
-                fetch(`https://fAIr-dev.hotosm.org/api/v1/model/${mid}/`)
+                fetch(`${API_URL}/api/v1/model/${mid}/`)
                   .then((res) => res.json())
                   .then((model) => showModelInfo(model));
               });
-
               map.on("mouseenter", "centroid-points", () => {
                 map.getCanvas().style.cursor = "pointer";
               });
@@ -431,7 +358,6 @@
                 map.getCanvas().style.cursor = "";
               });
             } else {
-              // Just update the data if source already exists
               map.getSource("centroids").setData(data);
             }
           })
@@ -445,36 +371,33 @@
       function showModelInfo(model) {
         const infoCard = document.getElementById("info");
         const infoContent = document.getElementById("info-content");
-
-        // Format date
-        const createdDate = new Date(model.created_at);
-        const formattedDate = createdDate.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-
+        const formattedDate = new Date(model.created_at).toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }
+        );
         infoContent.innerHTML = `
           <h2 class="text-lg font-bold text-cyan-400 mb-2">${
             model.name || "Unnamed Model"
           }</h2>
-          
           <div class="mb-4">
             ${
               model.accuracy
                 ? `<div class="bg-cyan-900/30 rounded-full h-2 mb-1">
-                <div class="bg-cyan-500 h-2 rounded-full" style="width: ${Math.min(
-                  model.accuracy,
-                  100
-                )}%"></div>
-              </div>
-              <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${
-                model.accuracy
-              }%</div>`
+                    <div class="bg-cyan-500 h-2 rounded-full" style="width: ${Math.min(
+                      model.accuracy,
+                      100
+                    )}%"></div>
+                  </div>
+                  <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${
+                    model.accuracy
+                  }%</div>`
                 : '<p class="text-gray-400 text-sm">Accuracy not available</p>'
             }
           </div>
-          
           <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
             <div>
               <p class="text-gray-400">User</p>
@@ -497,43 +420,28 @@
               <p class="font-medium">${model.base_model || "Not specified"}</p>
             </div>
           </div>
-          
-          <button onclick="window.open('https://fAIr-dev.hotosm.org/ai-models/${
-            model.id
-          }', '_blank')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center gap-2">
+          <button onclick="window.open('${API_URL}/ai-models/${
+          model.id
+        }', '_blank')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-              <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+              <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
+              <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
             </svg>
             Explore Model
           </button>
         `;
-
         infoCard.classList.remove("hidden");
       }
 
-      // Responsive adjustments
+      // Responsive zoom adjustment
       window.addEventListener("resize", () => {
-        if (window.innerWidth < 768) {
-          map.setZoom(1.2);
-        } else {
-          map.setZoom(1.8);
-        }
+        map.setZoom(window.innerWidth < 768 ? 1.2 : 1.8);
       });
 
-      // Add loading class to hide the "fade-out" animation
-      document.head.insertAdjacentHTML(
-        "beforeend",
-        `
-        <style>
-          .fade-out {
-            opacity: 0;
-            transition: opacity 0.5s;
-            pointer-events: none;
-          }
-        </style>
-      `
-      );
+      // Close info card
+      document.getElementById("close-info").addEventListener("click", () => {
+        document.getElementById("info").classList.add("hidden");
+      });
     </script>
   </body>
 </html>
