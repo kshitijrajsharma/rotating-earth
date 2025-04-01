@@ -4,14 +4,19 @@
     <meta charset="UTF-8" />
     <title>Rotating Globe - fAIr Models</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- MapLibre and Tailwind -->
     <link
       href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css"
       rel="stylesheet"
     />
     <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
     <style>
-      /* Custom animations */
       @keyframes pulse {
         0% {
           transform: scale(1);
@@ -25,6 +30,9 @@
           transform: scale(1);
           opacity: 0.8;
         }
+      }
+      .maplibregl-canvas {
+        margin-top: -60px !important;
       }
       .pulse {
         animation: pulse 2s infinite ease-in-out;
@@ -47,10 +55,10 @@
   <body
     class="m-0 p-0 h-screen w-screen bg-[#04090d] overflow-hidden relative font-sans text-gray-100"
   >
-    <!-- Map (full screen) -->
+    <!-- Fullscreen Map -->
     <div id="map" class="absolute inset-0"></div>
 
-    <!-- Info Card (over map) -->
+    <!-- Info Card -->
     <div
       id="info"
       class="hidden fade-in fixed top-4 left-4 md:max-w-sm bg-gray-900/90 backdrop-blur rounded-lg p-4 shadow-xl border border-cyan-500/20 z-10"
@@ -60,23 +68,12 @@
         class="absolute top-2 right-3 text-gray-400 hover:text-white transition-colors"
         aria-label="Close"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clip-rule="evenodd"
-          />
-        </svg>
+        <span class="material-icons">close</span>
       </button>
       <div id="info-content"></div>
     </div>
 
-    <!-- Title (over map) -->
+    <!-- Title -->
     <div class="fixed top-4 right-4 z-10 text-right">
       <h1
         class="text-xl md:text-2xl font-bold text-cyan-400 drop-shadow-lg m-0"
@@ -97,35 +94,22 @@
           id="toggle-rotation"
           class="flex items-center gap-2 bg-cyan-800/70 hover:bg-cyan-700/80 text-cyan-100 px-3 py-2 rounded transition-all font-medium text-sm"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          <span class="material-icons align-middle">autorenew</span>
           <span>Rotation: ON</span>
         </button>
         <button
           id="toggle-theme"
           class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded transition-all font-medium text-sm"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"
-            />
-          </svg>
+          <span class="material-icons align-middle">wb_sunny</span>
           <span>Classic Map</span>
+        </button>
+        <button
+          id="toggle-api"
+          class="flex items-center gap-2 bg-gray-800/70 hover:bg-gray-700/80 text-gray-100 px-3 py-2 rounded transition-all font-medium text-sm"
+        >
+          <span class="material-icons align-middle">api</span>
+          <span>API: DEV</span>
         </button>
       </div>
       <div class="flex items-center gap-3">
@@ -153,13 +137,14 @@
     </div>
 
     <script>
-      // Set environment: "dev" or "prod"
-      const ENV = "dev"; // change to "prod" for production
-      const API_URL =
-        ENV === "prod"
+      // API Toggle Setup
+      let currentAPI = "dev";
+      let API_URL =
+        currentAPI === "prod"
           ? "https://api-prod.fair.hotosm.org"
           : "https://fair-dev.hotosm.org";
 
+      // Hide loading indicator after load
       window.addEventListener("load", () => {
         setTimeout(() => {
           const loadingEl = document.getElementById("loading");
@@ -204,44 +189,43 @@
 
       const toggleRotationBtn = document.getElementById("toggle-rotation");
       const toggleThemeBtn = document.getElementById("toggle-theme");
+      const toggleApiBtn = document.getElementById("toggle-api");
 
+      // Toggle rotation
       toggleRotationBtn.addEventListener("click", () => {
         isRotating = !isRotating;
         toggleRotationBtn.classList.toggle("bg-cyan-800/70");
         toggleRotationBtn.classList.toggle("bg-cyan-600/90");
         if (isRotating) {
-          toggleRotationBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-            </svg>
-            <span>Rotation: ON</span>
-          `;
+          toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">autorenew</span> <span>Rotation: ON</span>`;
           animateGlobe();
         } else {
-          toggleRotationBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
-            </svg>
-            <span>Rotation: OFF</span>
-          `;
+          toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
           cancelAnimationFrame(animationFrameId);
         }
       });
 
+      // Toggle map style
       toggleThemeBtn.addEventListener("click", () => {
         currentMapStyle = currentMapStyle === "dark" ? "classic" : "dark";
         toggleThemeBtn.innerHTML =
           currentMapStyle === "classic"
-            ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                 <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-               </svg>
-               <span>Modern Map</span>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-               </svg>
-               <span>Classic Map</span>`;
+            ? `<span class="material-icons align-middle">dark_mode</span> <span>Modern Map</span>`
+            : `<span class="material-icons align-middle">wb_sunny</span> <span>Classic Map</span>`;
         map.setStyle(mapStyles[currentMapStyle]);
         map.once("style.load", addMapLayers);
+      });
+
+      // Toggle API endpoint
+      toggleApiBtn.addEventListener("click", () => {
+        currentAPI = currentAPI === "dev" ? "prod" : "dev";
+        API_URL =
+          currentAPI === "prod"
+            ? "https://api-prod.fair.hotosm.org"
+            : "https://fair-dev.hotosm.org";
+        toggleApiBtn.innerHTML = `<span class="material-icons align-middle">api</span> <span>API: ${currentAPI.toUpperCase()}</span>`;
+        // Re-fetch map layers with new API endpoint
+        addMapLayers();
       });
 
       map.on("style.load", () => {
@@ -255,12 +239,7 @@
               "bg-cyan-800/70",
               "bg-cyan-600/90"
             );
-            toggleRotationBtn.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
-              </svg>
-              <span>Rotation: OFF</span>
-            `;
+            toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
             cancelAnimationFrame(animationFrameId);
           }
         });
@@ -281,7 +260,6 @@
             document.getElementById(
               "model-count"
             ).textContent = `${modelCount} models worldwide`;
-
             if (!map.getSource("centroids")) {
               map.addSource("centroids", { type: "geojson", data });
               map.addLayer({
@@ -338,12 +316,7 @@
                     "bg-cyan-800/70",
                     "bg-cyan-600/90"
                   );
-                  toggleRotationBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
-                    </svg>
-                    <span>Rotation: OFF</span>
-                  `;
+                  toggleRotationBtn.innerHTML = `<span class="material-icons align-middle">pause</span> <span>Rotation: OFF</span>`;
                   cancelAnimationFrame(animationFrameId);
                 }
                 const mid = e.features[0].properties.mid;
@@ -387,14 +360,14 @@
             ${
               model.accuracy
                 ? `<div class="bg-cyan-900/30 rounded-full h-2 mb-1">
-                    <div class="bg-cyan-500 h-2 rounded-full" style="width: ${Math.min(
-                      model.accuracy,
-                      100
-                    )}%"></div>
-                  </div>
-                  <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${
-                    model.accuracy
-                  }%</div>`
+                     <div class="bg-cyan-500 h-2 rounded-full" style="width: ${Math.min(
+                       model.accuracy,
+                       100
+                     )}%"></div>
+                   </div>
+                   <div class="text-xs text-right text-cyan-300 font-medium">Accuracy: ${
+                     model.accuracy
+                   }%</div>`
                 : '<p class="text-gray-400 text-sm">Accuracy not available</p>'
             }
           </div>
@@ -423,22 +396,17 @@
           <button onclick="window.open('${API_URL}/ai-models/${
           model.id
         }', '_blank')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/>
-              <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/>
-            </svg>
-            Explore Model
+            <span class="material-icons">open_in_new</span>
+            <span>Explore Model</span>
           </button>
         `;
         infoCard.classList.remove("hidden");
       }
 
-      // Responsive zoom adjustment
       window.addEventListener("resize", () => {
         map.setZoom(window.innerWidth < 768 ? 1.2 : 1.8);
       });
 
-      // Close info card
       document.getElementById("close-info").addEventListener("click", () => {
         document.getElementById("info").classList.add("hidden");
       });
